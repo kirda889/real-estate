@@ -7,8 +7,8 @@
 <meta name="description" content="فيديو عقاري بالذكاء الاصطناعي من صورة الأرض الحقيقية، تصوير درون، وكتيّبات مبيعات. لمطوّري ومسوّقي العقار في جدة.">
 <meta name="theme-color" content="#0B0B0D">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230B0B0D'/><rect x='8' y='8' width='16' height='16' fill='none' stroke='%23FF6A00' stroke-width='2.5'/></svg>">
-<link rel="preload" href="assets/fonts/din-light.otf" as="font" type="font/otf" crossorigin>
-<link rel="preload" href="assets/fonts/din-ultralight.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="assets/fonts/din-light.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/din-ultralight.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="scrollcraft.css">
 <link rel="stylesheet" href="page.css">
 </head>
@@ -31,7 +31,7 @@
   <section class="hero" data-sc-act="scrub" data-sc-span="2.6" data-sc-dwell="0.22" data-tl="البداية" id="start">
     <div data-sc-stage class="hero__stage">
       <div class="hero__clip hero__clip--full">
-        <img class="sc-stage__poster" src="assets/img/hero2-poster.jpg" alt="" width="1920" height="1080">
+        <picture><source media="(max-width: 860px)" srcset="assets/img/hero2-poster-m.jpg"><img class="sc-stage__poster" src="assets/img/hero2-poster.jpg" alt="" width="1920" height="1080" fetchpriority="high"></picture>
         <video data-sc-scrub data-sc-src="assets/video/hero2.mp4" data-sc-src-mobile="assets/video/hero2-m.mp4" muted playsinline></video>
         <p class="hero__tag">مشهد مولّد بالذكاء الاصطناعي: النهار يتحوّل إلى الساعة الذهبية والسيارة تصل.</p>
       </div>
@@ -50,7 +50,7 @@
   <!-- 2 · الحجة -->
   <section class="why" data-sc-act="pin" data-sc-span="3.4" data-tl="ليش" id="why">
     <div data-sc-stage class="why__stage">
-      <div class="why__bg" data-sc-parallax="-0.7" aria-hidden="true"><img src="assets/img/bg-coast.webp" alt="" width="2000" height="1240" decoding="async"></div>
+      <div class="why__bg" data-sc-parallax="-0.7" aria-hidden="true"><img src="assets/img/bg-coast.webp" alt="" width="2000" height="1240" loading="lazy" decoding="async"></div>
       <div class="why__inner">
         <p class="why__line" data-sc-cue="0 0.30 0">المطوّر اللي يبيع على الخارطة، يبيع وعداً.</p>
         <p class="why__line" data-sc-cue="0.24 0.54">والمشتري ما يدفع لوعد. يدفع لشي شافه.</p>

@@ -1,6 +1,6 @@
 /* يوسف الشمراني · صفحة الهبوط · الثيم والأقسام الخاصة. المحرك (scrollcraft.css) لا يُعدَّل. */
-@font-face { font-family: "DIN Light"; src: url("assets/fonts/din-light.otf") format("opentype"); font-weight: 300 700; font-display: swap; }
-@font-face { font-family: "DIN Ultra"; src: url("assets/fonts/din-ultralight.otf") format("opentype"); font-weight: 100 400; font-display: swap; }
+@font-face { font-family: "DIN Light"; src: url("assets/fonts/din-light.woff2") format("woff2"), url("assets/fonts/din-light.otf") format("opentype"); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: "DIN Ultra"; src: url("assets/fonts/din-ultralight.woff2") format("woff2"), url("assets/fonts/din-ultralight.otf") format("opentype"); font-weight: 100 400; font-display: swap; }
 
 :root {
   --sc-canvas: #0B0B0D;

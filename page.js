@@ -230,7 +230,8 @@
       jl: { dir: 'assets/book/jl/', n: 16, w: 1400, h: 974 },
       es: { dir: 'assets/book/es/', n: 20, w: 798, h: 1418 }
     };
-    var book = null, leaves = [], flipped = 0, single = false, pw = 0, ph = 0;
+    var book = null, leaves = [], flipped = 0, single = false, pw = 0, ph = 0, shadow = null, turning = -1, turnT = 0;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function pad2(n) { return (n < 10 ? '0' : '') + n; }
     function src(b, p) { return p >= 1 && p <= b.n ? b.dir + pad2(p) + '.webp' : ''; }
@@ -258,6 +259,7 @@
       book = BOOKS[key]; flipped = 0; leaves = [];
       stage.innerHTML = '';
       layout();
+      shadow = document.createElement('div'); shadow.className = 'flip__shadow'; stage.appendChild(shadow);
       var spine = document.createElement('div'); spine.className = 'flip__spine'; stage.appendChild(spine);
       var count = single ? book.n : Math.ceil(book.n / 2);
       for (var i = 0; i < count; i++) {
@@ -272,12 +274,35 @@
       paint();
     }
     function paint() {
+      // سفاري يتجاهل ترتيب الطبقات (z-index) داخل المشهد ثلاثي الأبعاد، فكل ورقة تاخذ عمقاً ثابتاً:
+      // أعلى كل كومة على 0، واللي تحتها تنزل 2 بكسل لكل ورقة، والورقة اللي تتقلب الحين ترتفع فوق الكل.
+      // ونخفي الأوراق البعيدة حتى ما تتزاحم ولا تتراكم ظلالها.
       leaves.forEach(function (l, i) {
         var isF = i < flipped;
         l.classList.toggle('is-flipped', isF);
-        // المقلوب الأحدث فوق كومة اليمين، وغير المقلوب الأول فوق كومة اليسار
+        var depth = isF ? (flipped - 1 - i) : (i - flipped);
+        var z = (i === turning) ? 3 : -depth * 2;
+        l.style.setProperty('--z', z + 'px');
         l.style.zIndex = isF ? (i + 1) : (leaves.length - i + leaves.length);
+        l.classList.toggle('is-near', i >= flipped - 2 && i <= flipped + 1);
+        if (i === turning) l.style.zIndex = leaves.length * 3;
+        // الوجه الظاهر: الورقة المتقلبة الحين تبدّل وجهها عند منتصف الحركة (90 درجة)، والباقي فوراً
+        var wantBack = isF;
+        if (l.classList.contains('show-back') !== wantBack) {
+          clearTimeout(l.__faceT);
+          if (i === turning && !reducedMotion) l.__faceT = setTimeout(function () { l.classList.toggle('show-back', wantBack); }, 380);
+          else l.classList.toggle('show-back', wantBack);
+        }
       });
+      if (shadow) {
+        var left = 0, width = pw;
+        if (!single) {
+          if (flipped === 0) { left = 0; width = pw; }
+          else if (flipped >= leaves.length) { left = pw; width = pw; }
+          else { left = 0; width = pw * 2; }
+        }
+        shadow.style.left = left + 'px'; shadow.style.width = width + 'px';
+      }
       var page = single ? Math.min(flipped + 1, book.n) : Math.min(flipped * 2 + 1, book.n);
       if (!single && flipped > 0) page = Math.min(flipped * 2, book.n);
       // الغلاف لوحده في البداية والصفحة الأخيرة لوحدها في النهاية: نزيح الكتاب عشان تتوسط الصفحة المفردة
@@ -289,8 +314,9 @@
       prevBtn.disabled = flipped === 0;
       nextBtn.disabled = flipped >= leaves.length - (single ? 1 : 0);
     }
-    function next() { if (flipped < leaves.length - (single ? 1 : 0)) { flipped++; paint(); } }
-    function prev() { if (flipped > 0) { flipped--; paint(); } }
+    function turn(i) { turning = i; clearTimeout(turnT); turnT = setTimeout(function () { turning = -1; paint(); }, 800); }
+    function next() { if (flipped < leaves.length - (single ? 1 : 0)) { turn(flipped); flipped++; paint(); } }
+    function prev() { if (flipped > 0) { flipped--; turn(flipped); paint(); } }
     nextBtn.addEventListener('click', next);
     prevBtn.addEventListener('click', prev);
     root.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') next(); if (e.key === 'ArrowRight') prev(); });
@@ -309,6 +335,7 @@
       stage.setPointerCapture(e.pointerId);
       stage.classList.add('is-drag');
       leaf.style.zIndex = leaves.length * 3;
+      leaf.style.setProperty('--z', '3px');
       e.preventDefault();
     });
     stage.addEventListener('pointermove', function (e) {
@@ -318,13 +345,14 @@
       var k = drag.fwd ? Math.min(Math.max(dx / drag.w, 0), 1) : Math.min(Math.max(-dx / drag.w, 0), 1);
       var deg = drag.fwd ? k * 180 : 180 - k * 180;
       drag.k = k;
-      drag.leaf.style.transform = 'rotateY(' + deg.toFixed(2) + 'deg)';
+      drag.leaf.style.setProperty('--r', deg.toFixed(2) + 'deg');
+      clearTimeout(drag.leaf.__faceT); drag.leaf.classList.toggle('show-back', deg > 90);
     });
     function endDrag(e) {
       if (!drag) return;
       stage.classList.remove('is-drag');
       var d = drag; drag = null;
-      d.leaf.style.transform = '';
+      d.leaf.style.removeProperty('--r');
       if (!d.moved) { // ضغطة: يسار = التالي، يمين = السابق
         var r = stage.getBoundingClientRect();
         if (single || e.clientX < r.left + pw) next(); else prev();

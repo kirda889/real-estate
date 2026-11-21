@@ -238,7 +238,12 @@
     function face(cls, url, alt) {
       var f = document.createElement('div');
       f.className = 'face ' + cls + (url ? '' : ' face--blank');
-      if (url) { var im = document.createElement('img'); im.src = url; im.alt = alt || ''; im.loading = 'lazy'; im.decoding = 'async'; f.appendChild(im); }
+      if (url) {
+        var im = document.createElement('img'); im.alt = alt || ''; im.decoding = 'async';
+        f.classList.add('is-loading');
+        im.addEventListener('load', function () { f.classList.remove('is-loading'); }, { once: true });
+        im.src = url; f.appendChild(im);
+      }
       return f;
     }
     function layout() {
@@ -374,5 +379,13 @@
     var rt = 0;
     window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { var was = single; layout(); if (was !== single) build(document.querySelector('.book__pick .tab.is-on').getAttribute('data-book')); }, 120); });
     build('jl');
+    // نحمّل أول صفحات الكتيّبين قبل ما يوصل الزائر للقسم، حتى ما يشوف صفحة فاضية
+    if ('IntersectionObserver' in window) {
+      var pre = new IntersectionObserver(function (en) {
+        if (!en[0].isIntersecting) return; pre.disconnect();
+        Object.keys(BOOKS).forEach(function (k) { for (var p = 1; p <= 4; p++) { var i = new Image(); i.decoding = 'async'; i.src = src(BOOKS[k], p); } });
+      }, { rootMargin: '1200px 0px' });
+      pre.observe(root);
+    }
   })();
 })();
